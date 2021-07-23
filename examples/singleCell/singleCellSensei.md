@@ -13,3 +13,5 @@
 
 6. Return to `BloodFlow/examples/singleCell` and run: `qsub -n 1 -t 10 -q debug ./singleCell.sh`
 
+PVD Note: 
+	Connor and I were able to get both the fluid.pvd and cells.pvd working yesterday. Today I went to clone the repo and run it on my own computer and now I am only getting the cells.pvd. Although, I am still getting all the vti files from the fluid meshes. Connor also noted that he tried to run it this morning and ran into the same issue. Victor advised removing the fluid meshes from the xml file and run it with only the cells. The simulation still outputed the cells.pvd and all of its vtp files. 
