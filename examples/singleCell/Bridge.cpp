@@ -26,14 +26,15 @@ void SetData(double **x, long ntimestep, int nghost,
              int nlocal, double xsublo, double xsubhi, 
              double ysublo, double ysubhi, double zsublo, 
              double zsubhi, int **anglelist, int nanglelist, 
-	         MultiTensorField3D<double, 3> velocityArray,
-	         MultiTensorField3D<double, 3> vorticityArray,
-	         MultiScalarField3D<double> velocityNormArray)
+	     MultiTensorField3D<double, 3> velocityArray,
+	     MultiTensorField3D<double, 3> vorticityArray,
+	     MultiScalarField3D<double> velocityNormArray,
+	     int nx, int ny, int nz)
 {
   GlobalDataAdaptor->AddLAMMPSData(x, ntimestep, nghost, nlocal, xsublo, xsubhi,
                                    ysublo, ysubhi, zsublo, zsubhi, anglelist, nanglelist);
   
-  int nx = 20, ny = 20, nz = 40;
+ // int nx = 20, ny = 20, nz = 40;
 
 
   vtkDoubleArray *velocityDoubleArray = vtkDoubleArray::New();

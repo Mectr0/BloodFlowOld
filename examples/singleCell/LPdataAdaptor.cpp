@@ -177,12 +177,12 @@ int LPDataAdaptor::GetMeshMetadata(unsigned int id, sensei::MeshMetadataPtr &met
 	metadata->CoordinateType = VTK_DOUBLE;
 	metadata->NumBlocks = nRanks;
 	metadata->NumBlocksLocal = {1}; 
-	metadata->NumArrays=1;
-	metadata->ArrayName = {"velocity"};
-	metadata->ArrayComponents = {3}; 
-	metadata->ArrayType = {VTK_DOUBLE};
-	metadata->ArrayCentering = {vtkDataObject::CELL};
-	metadata->StaticMesh = 1; 
+	metadata->NumArrays=3;
+	metadata->ArrayName = {"velocity", "vorticity", "velocityNorm"};
+	metadata->ArrayComponents = {3, 3, 1}; 
+	metadata->ArrayType = {VTK_DOUBLE, VTK_DOUBLE, VTK_DOUBLE};
+	metadata->ArrayCentering = {vtkDataObject::POINT, vtkDataObject::POINT, vtkDataObject::POINT};
+	metadata->StaticMesh = 0; 
 
     if (metadata->Flags.BlockDecompSet())
     {

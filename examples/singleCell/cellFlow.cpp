@@ -473,11 +473,14 @@ int main(int argc, char* argv[]) {
         //-----force FSI ibm coupling-------------//
         //forceCoupling3D(lattice,wrapper);
         //lattice.collideAndStream();
+        int nx = parameters.getNx();
+	int ny = parameters.getNy();
+	int nz = parameters.getNz(); 
         MultiTensorField3D<double, 3> velocityArray= *computeVelocity(lattice);
         MultiTensorField3D<double, 3> vorticityArray= *computeVorticity(velocityArray);
         MultiScalarField3D<double> velocityNormArray= *computeVelocityNorm(lattice);
         Bridge::SetData(x, ntimestep, nghost ,nlocal, xsublo, xsubhi, ysublo, ysubhi, zsublo, zsubhi, anglelist, nanglelist,
-			            velocityArray, vorticityArray, velocityNormArray);  
+			            velocityArray, vorticityArray, velocityNormArray, nx, ny, nz);  
         Bridge::Analyze(time++);
 	
     }
