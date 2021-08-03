@@ -23,27 +23,30 @@ namespace senseiLP
 //----------------------------------------------------------------------
 struct LPDataAdaptor::DInternals
 {
-  vtkSmartPointer<vtkMultiBlockDataSet> mesh;
-  vtkSmartPointer<vtkDoubleArray> AtomPositions;
-  vtkSmartPointer<vtkIntArray> AtomTypes;
-  vtkSmartPointer<vtkIntArray> AtomIDs;
-  vtkSmartPointer<vtkCellArray> vertices;
+   vtkSmartPointer<vtkMultiBlockDataSet> mesh;
+   vtkSmartPointer<vtkDoubleArray> AtomPositions;
+   vtkSmartPointer<vtkIntArray> AtomTypes;
+   vtkSmartPointer<vtkIntArray> AtomIDs;
+   vtkSmartPointer<vtkCellArray> vertices;
  
 // -------- PALABOS ---------------------
-  vtkDoubleArray *pb_velocityDoubleArray;
-  vtkDoubleArray *pb_vorticityDoubleArray; 
-  vtkDoubleArray *pb_velocityNormDoubleArray;
+   vtkDoubleArray *pb_velocityDoubleArray;
+   vtkDoubleArray *pb_vorticityDoubleArray; 
+   vtkDoubleArray *pb_velocityNormDoubleArray;
+   double Nx;
+   double Ny; 
+   double Nz; 
 // --------------------------------------
-  double xsublo, ysublo, zsublo, xsubhi, ysubhi, zsubhi;
-  long NumBlocks;
-  int nlocal, nghost, nanglelist;
-  double **x;
-  int *type;
-  int **anglelist;
-  int *id;
+   double xsublo, ysublo, zsublo, xsubhi, ysubhi, zsubhi;
+   long NumBlocks;
+   int nlocal, nghost, nanglelist;
+   double **x;
+   int *type;
+   int **anglelist;
+   int *id;
 };
 //----------------------------------------------------------------------
-senseiNewMacro(LPDataAdaptor);
+   senseiNewMacro(LPDataAdaptor);
 //----------------------------------------------------------------------
 LPDataAdaptor::LPDataAdaptor() :
   Internals(new LPDataAdaptor::DInternals())
@@ -52,12 +55,16 @@ LPDataAdaptor::LPDataAdaptor() :
 //----------------------------------------------------------------------
 LPDataAdaptor::~LPDataAdaptor()
 {
-  delete this->Internals;
+   delete this->Internals;
 }
 //----------------------------------------------------------------------
-void LPDataAdaptor::Initialize()
+void LPDataAdaptor::Initialize(double Nx, double Ny, double Nz)
 {
-  this->ReleaseData();//ReleaseData must be correctly defined!!
+   DInternals& internals = (*this->Internals); 
+   internals.Nx = Nx;
+   internals.Ny = Ny;
+   internals.Nz = Nz;
+   this->ReleaseData();//ReleaseData must be correctly defined!!
 }
 //----------------------------------------------------------------------
 void LPDataAdaptor::AddLAMMPSData(double **x, long ntimestep, int nghost, 
@@ -67,46 +74,46 @@ void LPDataAdaptor::AddLAMMPSData(double **x, long ntimestep, int nghost,
 
 {
 
-  DInternals& internals = (*this->Internals);
+   DInternals& internals = (*this->Internals);
   
-  if(!internals.AtomPositions)
-  {
-    internals.AtomPositions = vtkSmartPointer<vtkDoubleArray>::New();
-  }
+   if(!internals.AtomPositions)
+   {
+     internals.AtomPositions = vtkSmartPointer<vtkDoubleArray>::New();
+   }
  
 // atom coordinates
-  if (internals.AtomPositions)
-  {
-    long nvals = nlocal;
+   if (internals.AtomPositions)
+   {
+     long nvals = nlocal;
     
-    internals.AtomPositions->SetNumberOfComponents(3);
-    internals.AtomPositions->SetArray(*x, nvals*3, 1);
-    internals.AtomPositions->SetName("positions");
+     internals.AtomPositions->SetNumberOfComponents(3);
+     internals.AtomPositions->SetArray(*x, nvals*3, 1);
+     internals.AtomPositions->SetName("positions");
     
-    internals.x = x;
-  }  
-  else
-  {
-    SENSEI_ERROR("Error. Internal AtomPositions structure not initialized")
-  }
+     internals.x = x;
+   }  
+   else
+   {
+     SENSEI_ERROR("Error. Internal AtomPositions structure not initialized")
+   }
 
 // anglelists
-  internals.anglelist = anglelist;
-  internals.nanglelist = nanglelist;
+   internals.anglelist = anglelist;
+   internals.nanglelist = nanglelist;
 
 // number of atoms
-  internals.nlocal = nlocal;
-  internals.nghost = nghost;
+   internals.nlocal = nlocal;
+   internals.nghost = nghost;
 
 // bounding box 
-  internals.xsublo = xsublo;
-  internals.ysublo = ysublo;
-  internals.zsublo = zsublo;
-  internals.xsubhi = xsubhi;
-  internals.ysubhi = ysubhi;
-  internals.zsubhi = zsubhi;
+   internals.xsublo = xsublo;
+   internals.ysublo = ysublo;
+   internals.zsublo = zsublo;
+   internals.xsubhi = xsubhi;
+   internals.ysubhi = ysubhi;
+   internals.zsubhi = zsubhi;
 // timestep
-  this->SetDataTimeStep(ntimestep);
+   this->SetDataTimeStep(ntimestep);
 
 }
 //---------------------------------------------------------------------------
@@ -115,13 +122,11 @@ void LPDataAdaptor::AddPalabosData(vtkDoubleArray *velocityDoubleArray,
 		    		   vtkDoubleArray *velocityNormDoubleArray)  
 {
 
-	int nx = 20, ny = 20, nz = 40; 
-	DInternals& internals = (*this->Internals);
+   DInternals& internals = (*this->Internals);
 
-	
-	internals.pb_velocityDoubleArray = velocityDoubleArray;
-	internals.pb_vorticityDoubleArray = vorticityDoubleArray; 
-	internals.pb_velocityNormDoubleArray = velocityNormDoubleArray;  
+   internals.pb_velocityDoubleArray = velocityDoubleArray;
+   internals.pb_vorticityDoubleArray = vorticityDoubleArray; 
+   internals.pb_velocityNormDoubleArray = velocityNormDoubleArray;  
 
 }   
 //----------------------------------------------------------------------
@@ -133,74 +138,78 @@ int LPDataAdaptor::GetNumberOfMeshes(unsigned int &numMeshes)
 //----------------------------------------------------------------------
 int LPDataAdaptor::GetMeshMetadata(unsigned int id, sensei::MeshMetadataPtr &metadata) 
 {
-    int rank = 0;	
-	int nRanks = 1;
-	int nx = 20, ny = 20, nz =40; // pass these from palabos!!! 
-	MPI_Comm_rank(this->GetCommunicator(), &rank);
-	MPI_Comm_rank(this->GetCommunicator(), &nRanks); 	
-
-  if (id == 0)
-  {
-    cout << "TESTING!!!!!!" << endl;
-    metadata->MeshName = "cells";
-    metadata->MeshType = VTK_POLY_DATA;
-    metadata->BlockType = VTK_POLY_DATA;
-    metadata->CoordinateType = VTK_DOUBLE;
-    metadata->NumBlocks = nRanks;
-    metadata->NumBlocksLocal = {1};
-    //metadata->NumGhostCells = this->Internals->nghost;
+   int rank = 0;	
+   int nRanks = 1;
+   MPI_Comm_rank(this->GetCommunicator(), &rank);
+   MPI_Comm_rank(this->GetCommunicator(), &nRanks); 	
+   DInternals& internals = (*this->Internals);
+   
+   if (id == 0)
+   {
+     cout << "TESTING!!!!!!" << endl;
+     metadata->MeshName = "cells";
+     metadata->MeshType = VTK_POLY_DATA;
+     metadata->BlockType = VTK_POLY_DATA;
+     metadata->CoordinateType = VTK_DOUBLE;
+     metadata->NumBlocks = nRanks;
+     metadata->NumBlocksLocal = {1};
+     //metadata->NumGhostCells = this->Internals->nghost;
     
-    metadata->NumArrays = 1;
-    metadata->ArrayName = {"data"};
-    metadata->ArrayCentering = {vtkDataObject::CELL};
-    metadata->ArrayComponents = {1};
-    metadata->ArrayType = {VTK_FLOAT};
+     metadata->NumArrays = 1;
+     metadata->ArrayName = {"data"};
+     metadata->ArrayCentering = {vtkDataObject::CELL};
+     metadata->ArrayComponents = {1};
+     metadata->ArrayType = {VTK_FLOAT};
     
-    metadata->StaticMesh = 1;  
+     metadata->StaticMesh = 1;  
 
-    if (metadata->Flags.BlockDecompSet())
+   if (metadata->Flags.BlockDecompSet())
     {
-      metadata->BlockOwner.push_back(rank);
-      metadata->BlockIds.push_back(rank);
+       metadata->BlockOwner.push_back(rank);
+       metadata->BlockIds.push_back(rank);
     }
   
-    metadata->BlockNumCells.push_back(this->Internals->nlocal/3);
-    metadata->BlockNumPoints.push_back(this->Internals->nlocal*3);
-    metadata->BlockCellArraySize.push_back(this->Internals->nlocal);
+   metadata->BlockNumCells.push_back(this->Internals->nlocal/3);
+   metadata->BlockNumPoints.push_back(this->Internals->nlocal*3);
+   metadata->BlockCellArraySize.push_back(this->Internals->nlocal);
+
   }
  
-  else
-  {
-    metadata->MeshName = "fluid"; 
-	metadata->MeshType = VTK_IMAGE_DATA;
-	metadata->BlockType=VTK_IMAGE_DATA; 
-	metadata->CoordinateType = VTK_DOUBLE;
-	metadata->NumBlocks = nRanks;
-	metadata->NumBlocksLocal = {1}; 
-	metadata->NumArrays=3;
-	metadata->ArrayName = {"velocity", "vorticity", "velocityNorm"};
-	metadata->ArrayComponents = {3, 3, 1}; 
-	metadata->ArrayType = {VTK_DOUBLE, VTK_DOUBLE, VTK_DOUBLE};
-	metadata->ArrayCentering = {vtkDataObject::POINT, vtkDataObject::POINT, vtkDataObject::POINT};
-	metadata->StaticMesh = 0; 
+   else
+   {
+     metadata->MeshName = "fluid"; 
+     metadata->MeshType = VTK_IMAGE_DATA;
+     metadata->BlockType=VTK_IMAGE_DATA; 
+     metadata->CoordinateType = VTK_DOUBLE;
+     metadata->NumBlocks = nRanks;
+     metadata->NumBlocksLocal = {1}; 
+     metadata->NumArrays=3;
+     metadata->ArrayName = {"velocity", "vorticity", "velocityNorm"};
+     metadata->ArrayComponents = {3, 3, 1}; 
+     metadata->ArrayType = {VTK_DOUBLE, VTK_DOUBLE, VTK_DOUBLE};
+     metadata->ArrayCentering = {vtkDataObject::POINT, vtkDataObject::POINT, vtkDataObject::POINT};
+     metadata->StaticMesh = 0; 
 
-    if (metadata->Flags.BlockDecompSet())
+   if (metadata->Flags.BlockDecompSet())
     {
-      metadata->BlockOwner.push_back(rank);
-      metadata->BlockIds.push_back(rank);
+       metadata->BlockOwner.push_back(rank);
+       metadata->BlockIds.push_back(rank);
     }
-	 metadata->BlockNumCells.push_back(nx * ny * nz * 3); 
-	 metadata->BlockNumPoints.push_back(nx * ny * nz * 3); 
-	 metadata->BlockCellArraySize.push_back(nx * ny * nz); 
-  }
+  cout << " NX : " << internals.Nx << " NY : " << internals.Ny << " NZ : " <<  internals.Nz << endl; 
+   metadata->BlockNumCells.push_back(internals.Nx * internals.Ny * internals.Nz * 3); 
+   metadata->BlockNumPoints.push_back(internals.Nx * internals.Ny * internals.Nz * 3); 
+   metadata->BlockCellArraySize.push_back(internals.Nx * internals.Ny * internals.Nz); 
+ 
+ }
   
-  return 0;
+   return 0;
 }
 //----------------------------------------------------------------------
 int LPDataAdaptor::GetMesh(const std::string &meshName, bool structureOnly, vtkDataObject *&mesh)
 {
- if(meshName == "cells")
- {
+
+   if(meshName == "cells")
+   {
 /*
    if((meshName != "cells" ))
    {
@@ -209,24 +218,25 @@ int LPDataAdaptor::GetMesh(const std::string &meshName, bool structureOnly, vtkD
     }
 */
  
-  DInternals& internals = (*this->Internals);
+   DInternals& internals = (*this->Internals);
 
    vtkPolyData *pd = vtkPolyData::New();
 
-   if(!structureOnly){
-     vtkPoints *pts = vtkPoints::New();
-     pts->SetNumberOfPoints(internals.nlocal*3);
-     pts->SetData(internals.AtomPositions);
-     cout <<"TESTING 2 !!! " << endl;
-     vtkCellArray *Triangles = vtkCellArray::New();
-     for (int i = 0 ; i < internals.nanglelist ; i++)
-     {
-       vtkTriangle *Triangle = vtkTriangle::New();
-       Triangle->GetPointIds()->SetId(0, internals.anglelist[i][0]);
-       Triangle->GetPointIds()->SetId(1, internals.anglelist[i][1]);
-       Triangle->GetPointIds()->SetId(2, internals.anglelist[i][2]);
-       Triangles->InsertNextCell(Triangle);
-     }
+   if(!structureOnly)
+    {
+      vtkPoints *pts = vtkPoints::New();
+      pts->SetNumberOfPoints(internals.nlocal*3);
+      pts->SetData(internals.AtomPositions);
+      cout <<"TESTING 2 !!! " << endl;
+      vtkCellArray *Triangles = vtkCellArray::New();
+      for (int i = 0 ; i < internals.nanglelist ; i++)
+       {
+         vtkTriangle *Triangle = vtkTriangle::New();
+         Triangle->GetPointIds()->SetId(0, internals.anglelist[i][0]);
+         Triangle->GetPointIds()->SetId(1, internals.anglelist[i][1]);
+         Triangle->GetPointIds()->SetId(2, internals.anglelist[i][2]);
+         Triangles->InsertNextCell(Triangle);
+       }
 
      pd->SetPoints(pts);
      pd->SetPolys(Triangles);
@@ -234,36 +244,35 @@ int LPDataAdaptor::GetMesh(const std::string &meshName, bool structureOnly, vtkD
    }
    mesh = pd;
  }
- else if(meshName == "fluid")
- {
-   int nx = 20, ny = 20, nz = 40;
-   DInternals& internals = (*this->Internals);
-   mesh = nullptr; 
+   else if(meshName == "fluid")
+    {
+      DInternals& internals = (*this->Internals);
+      mesh = nullptr; 
  
-  cout << "Inside get mesh " << meshName << endl;
+      cout << "Inside get mesh " << meshName << endl;
 
-  vtkImageData *velocity = vtkImageData::New();
-  velocity->SetDimensions(nx, ny, nz); 
+      vtkImageData *velocity = vtkImageData::New();
+      velocity->SetDimensions(internals.Nx, internals.Ny, internals.Nz); 
  
-  vtkImageData *vorticity = vtkImageData::New(); 
-  vorticity->SetDimensions(nx, ny, nz); 
+      vtkImageData *vorticity = vtkImageData::New(); 
+      vorticity->SetDimensions(internals.Nx, internals.Ny, internals.Nz); 
 
-  vtkImageData *velocityNorm = vtkImageData::New();
-  velocityNorm->SetDimensions(nx, ny, nz); 
+      vtkImageData *velocityNorm = vtkImageData::New();
+      velocityNorm->SetDimensions(internals.Nx, internals.Ny, internals.Nz); 
    
-  velocity->GetPointData()->AddArray(internals.pb_velocityDoubleArray);
-  internals.pb_velocityDoubleArray->SetName("velocity");
+      velocity->GetPointData()->AddArray(internals.pb_velocityDoubleArray);
+      internals.pb_velocityDoubleArray->SetName("velocity");
 
-  vorticity->GetPointData()->AddArray(internals.pb_vorticityDoubleArray);
-  internals.pb_vorticityDoubleArray->SetName("vorticity"); 
+      vorticity->GetPointData()->AddArray(internals.pb_vorticityDoubleArray);
+      internals.pb_vorticityDoubleArray->SetName("vorticity"); 
 
-  velocityNorm->GetPointData()->AddArray(internals.pb_velocityNormDoubleArray);
-  internals.pb_velocityNormDoubleArray->SetName("velocityNorm");
+      velocityNorm->GetPointData()->AddArray(internals.pb_velocityNormDoubleArray);
+      internals.pb_velocityNormDoubleArray->SetName("velocityNorm");
 
-   mesh = velocity;
-   mesh = vorticity; 
-   mesh = velocityNorm; 
- }
+      mesh = velocity;
+      mesh = vorticity; 
+      mesh = velocityNorm; 
+   }
    return 0;
 }
 //----------------------------------------------------------------------
@@ -286,12 +295,9 @@ int LPDataAdaptor::AddArray(vtkDataObject* mesh, const std::string &meshName,
     int association, const std::string &arrayName)
 {
    DInternals& internals = (*this->Internals); 
-   //vtkImageData *velocity = vtkImageData::New();
    vtkImageData *velocity = dynamic_cast<vtkImageData*>(mesh);
    vtkImageData *vorticity = dynamic_cast<vtkImageData*>(mesh); 
    vtkImageData *velocityNorm = dynamic_cast<vtkImageData*>(mesh);
-  // vtkImageData *velocity = vtkImageData::New(); 
-  // velocity = vtkImageData::New(); 
    
    velocity->GetPointData()->AddArray(internals.pb_velocityDoubleArray);
    vorticity->GetPointData()->AddArray(internals.pb_vorticityDoubleArray); 
@@ -306,18 +312,18 @@ int LPDataAdaptor::AddArrays(vtkDataObject* mesh, const std::string &meshName, i
 //----------------------------------------------------------------------
 int LPDataAdaptor::ReleaseData() 
 {
-  DInternals& internals = (*this->Internals);
-  internals.AtomPositions = NULL;
-  internals.nlocal = 0;
-  internals.nghost = 0;
-  internals.xsublo = 0;
-  internals.ysublo = 0;
-  internals.zsublo = 0;
-  internals.xsubhi = 0;
-  internals.ysubhi = 0;
-  internals.zsubhi = 0;
+   DInternals& internals = (*this->Internals);
+   internals.AtomPositions = NULL;
+   internals.nlocal = 0;
+   internals.nghost = 0;
+   internals.xsublo = 0;
+   internals.ysublo = 0;
+   internals.zsublo = 0;
+   internals.xsubhi = 0;
+   internals.ysubhi = 0;
+   internals.zsubhi = 0;
   
-  return 0;
+   return 0;
 }
 
 }

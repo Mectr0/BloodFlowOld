@@ -1,9 +1,10 @@
 <sensei>
-  <analysis type="PosthocIO"
-    output_dir="./vtk_output" file_name="output" mode="paraview" enabled="1">
-      <mesh name="cells"/>
-      <mesh name="fluid">
+ <analysis output_dir="./datasets" type="catalyst" pipeline="pythonscript" filename="catCin.py" enabled="0" />
+ <analysis type="PosthocIO" output_dir="./testing" file_name="output" mode="paraview" enabled="1">
+    <mesh name="cells"/>
+    <mesh name="fluid">
         <point_arrays> velocity, vorticity, velocityNorm </point_arrays>
-    </mesh> 
-  </analysis>
+    </mesh>
+  </analysis> 
+  <analysis  type="histogram" mesh="fluid" array="velocityNorm" association="point" bins="10" enabled="1"/>
 </sensei>

@@ -3,7 +3,10 @@
 #include <vtkSmartPointer.h>
 #include <ConfigurableAnalysis.h>
 #include <iostream>
-
+#include <vtkUnstructuredGrid.h>
+#include <vtkPoints.h>
+#include <vtkDataArray.h>
+#include <vtkDataSet.h>
 using namespace std;
 using namespace plb; 
 namespace Bridge
@@ -11,10 +14,10 @@ namespace Bridge
    static vtkSmartPointer<senseiLP::LPDataAdaptor>  GlobalDataAdaptor;
    static vtkSmartPointer<sensei::ConfigurableAnalysis> GlobalAnalysisAdaptor;
 
-void Initialize(MPI_Comm world, const std::string& config_file){
+void Initialize(MPI_Comm world, const std::string& config_file, double Nx, double Ny, double Nz){
    
    GlobalDataAdaptor = vtkSmartPointer<senseiLP::LPDataAdaptor>::New();
-   GlobalDataAdaptor->Initialize();
+   GlobalDataAdaptor->Initialize(Nx, Ny, Nz);
    GlobalDataAdaptor->SetCommunicator(world);
    GlobalDataAdaptor->SetDataTimeStep(-1);
 
@@ -29,38 +32,36 @@ void SetData(double **x, long ntimestep, int nghost,
 	     MultiTensorField3D<double, 3> velocityArray,
 	     MultiTensorField3D<double, 3> vorticityArray,
 	     MultiScalarField3D<double> velocityNormArray,
-	     int nx, int ny, int nz)
+	     double Nx, double Ny, double Nz)
 {
   GlobalDataAdaptor->AddLAMMPSData(x, ntimestep, nghost, nlocal, xsublo, xsubhi,
                                    ysublo, ysubhi, zsublo, zsubhi, anglelist, nanglelist);
-  
- // int nx = 20, ny = 20, nz = 40;
 
+   vtkDoubleArray *velocityDoubleArray = vtkDoubleArray::New();
+   vtkDoubleArray *vorticityDoubleArray = vtkDoubleArray::New();
+   vtkDoubleArray *velocityNormDoubleArray = vtkDoubleArray::New();
+   
 
-  vtkDoubleArray *velocityDoubleArray = vtkDoubleArray::New();
-  vtkDoubleArray *vorticityDoubleArray = vtkDoubleArray::New();
-  vtkDoubleArray *velocityNormDoubleArray = vtkDoubleArray::New();
+   velocityDoubleArray->SetNumberOfComponents(3);
+   velocityDoubleArray->SetNumberOfTuples(Nx * Ny * Nz);
 
-  velocityDoubleArray->SetNumberOfComponents(3);
-  velocityDoubleArray->SetNumberOfTuples(nx * ny * nz);
-
-  vorticityDoubleArray->SetNumberOfComponents(3);
-  vorticityDoubleArray->SetNumberOfTuples(nx * ny * nz);
+   vorticityDoubleArray->SetNumberOfComponents(3);
+   vorticityDoubleArray->SetNumberOfTuples(Nx * Ny * Nz);
 
    velocityNormDoubleArray->SetNumberOfComponents(1);
-   velocityNormDoubleArray->SetNumberOfTuples(nx * ny * nz);
+   velocityNormDoubleArray->SetNumberOfTuples(Nx * Ny * Nz);
 
-  for (int i=0; i<nz; i++)
-  {
-    for (int j=0; j<ny; j++)
+   for (int i=0; i<Nz; i++)
+   {
+    for (int j=0; j<Ny; j++)
     {
-     for (int k=0; k<nx; k++)
+     for (int k=0; k<Nx; k++)
       {
         Array<double,3> vel = velocityArray.get(k,j,i); 
         Array<double,3> vor = vorticityArray.get(k,j,i);
         double norm = velocityNormArray.get(k,j,i);
 
-        int index = j * nx + k + i * nx * ny;
+        int index = j * Nx + k + i * Ny * Nx;
 
         velocityDoubleArray->SetTuple3(index,vel[0],vel[1],vel[2]);
         vorticityDoubleArray->SetTuple3(index,vor[0],vor[1],vor[2]);
@@ -70,7 +71,7 @@ void SetData(double **x, long ntimestep, int nghost,
   }
 
   
- GlobalDataAdaptor->AddPalabosData(velocityDoubleArray, vorticityDoubleArray, velocityNormDoubleArray); 
+  GlobalDataAdaptor->AddPalabosData(velocityDoubleArray, vorticityDoubleArray, velocityNormDoubleArray); 
    
 }
 void Analyze(long ntimestep)
@@ -81,10 +82,10 @@ void Analyze(long ntimestep)
    GlobalDataAdaptor->ReleaseData();
 }
 void Finalize()
-   {
+ {
    GlobalAnalysisAdaptor->Finalize();
    GlobalAnalysisAdaptor = NULL;
    GlobalDataAdaptor = NULL;
-   }
+ }
 }
 

@@ -279,7 +279,6 @@ void VtkPalabos(MultiBlockLattice3D<T, DESCRIPTOR>& lattice,
  	MultiTensorField3D<double, 3> VorticityArray=*computeVorticity(*computeVelocity(lattice));
 	MultiScalarField3D<double> VelocityNormArray=*computeVelocityNorm(lattice);
 
- 	pcout << VelocityNormArray << endl; 
 	int  nx = parameters.getNx();  
 	int  ny = parameters.getNy();  
 	int  nz = parameters.getNz();
@@ -289,24 +288,18 @@ void VtkPalabos(MultiBlockLattice3D<T, DESCRIPTOR>& lattice,
 
 	imageData->SetDimensions(nx, ny, nz);
 
-	//vtkSmartPointer<vtkDoubleArray> VelocityValues =
-        //	vtkSmartPointer<vtkDoubleArray>::New();
 	
 	vtkDoubleArray *VelocityValues = vtkDoubleArray::New(); 	 
 	
 	VelocityValues->SetNumberOfComponents(3);
 	VelocityValues->SetNumberOfTuples(nx * ny * nz); 
 
-	//vtkSmartPointer<vtkDoubleArray> VorticityValues =
-          //      vtkSmartPointer<vtkDoubleArray>::New();
       
 	vtkDoubleArray *VorticityValues = vtkDoubleArray::New();
         
 	VorticityValues->SetNumberOfComponents(3);
         VorticityValues->SetNumberOfTuples(nx * ny * nz);
 
-//	vtkSmartPointer<vtkDoubleArray> VelocityNormValues =
-  //              vtkSmartPointer<vtkDoubleArray>::New();
 
 	vtkDoubleArray *VelocityNormValues = vtkDoubleArray::New();
 	
@@ -340,18 +333,9 @@ void VtkPalabos(MultiBlockLattice3D<T, DESCRIPTOR>& lattice,
                 VorticityValues->SetName("Vorticity");
 
 	
-        imageData->GetPointData()->AddArray(VelocityNormValues); // ass these lines to add Array pb_vel
+        imageData->GetPointData()->AddArray(VelocityNormValues); 
                 VelocityNormValues->SetName("Velocity Norm");
 
-//	vtkSmartPointer<vtkXMLImageDataWriter> writer =
-//		vtkSmartPointer<vtkXMLImageDataWriter>::New();
-
-//	char filename[64];
-//      sprintf (filename, "VtkDataStruc%d.vti", iter);
-
-//	writer->SetInputData(imageData);
-//	writer->SetFileName(filename);
-//	writer->Write();
 }
 
 
@@ -375,7 +359,6 @@ int main(int argc, char* argv[]) {
     const T uMax = 0.00075;//uMaxRef /(T)N * (T)Nref; // Needed to avoid compressibility errors
     //using namespace opts;
     std::string config_file("cellFlow.xml");//Configuration file to tell SENSEI what to do with data.
-    Bridge::Initialize(global::mpi().getGlobalCommunicator(), config_file);//!!!!!!!!!!!! 
     /*Options ops(argc, argv);
     ops
     #ifdef ENABLE_SENSEI
@@ -386,10 +369,14 @@ int main(int argc, char* argv[]) {
             uMax,
             Re,
             N,
-            20.,        // lx
-            20.,        // ly
-            40.         // lz
+            30.,        // lx
+            30.,        // ly
+            80.         // lz
     );
+    double Nx = parameters.getNx();
+    double Ny = parameters.getNy();
+    double Nz = parameters.getNz();
+    Bridge::Initialize(global::mpi().getGlobalCommunicator(), config_file, Nx, Ny, Nz);//!!!!!!!!!!!!
     const T maxT    =100;//6.6e4; //(T)0.01;
     //plint iSave =10;//2000;//10;
     //plint iCheck = 10*iSave;
@@ -452,7 +439,6 @@ int main(int argc, char* argv[]) {
     int **anglelist = wrapper.lmp->neighbor->anglelist;
     int nanglelist = wrapper.lmp->neighbor->nanglelist;
     long time = 0; 
- 
     for (plint iT=0;iT<4e3;iT++){
         lattice.collideAndStream();
     }
@@ -473,18 +459,16 @@ int main(int argc, char* argv[]) {
         //-----force FSI ibm coupling-------------//
         //forceCoupling3D(lattice,wrapper);
         //lattice.collideAndStream();
-        int nx = parameters.getNx();
-	int ny = parameters.getNy();
-	int nz = parameters.getNz(); 
+     //   int nx = parameters.getNx();
+//	int ny = parameters.getNy();
+//	int nz = parameters.getNz(); 
         MultiTensorField3D<double, 3> velocityArray= *computeVelocity(lattice);
         MultiTensorField3D<double, 3> vorticityArray= *computeVorticity(velocityArray);
         MultiScalarField3D<double> velocityNormArray= *computeVelocityNorm(lattice);
         Bridge::SetData(x, ntimestep, nghost ,nlocal, xsublo, xsubhi, ysublo, ysubhi, zsublo, zsubhi, anglelist, nanglelist,
-			            velocityArray, vorticityArray, velocityNormArray, nx, ny, nz);  
+                        velocityArray, vorticityArray, velocityNormArray, Nx, Ny, Nz);  
         Bridge::Analyze(time++);
-	
     }
-
     timeduration = global::timer("mainloop").stop();
     pcout<<"total execution time "<<timeduration<<endl;
     delete boundaryCondition;

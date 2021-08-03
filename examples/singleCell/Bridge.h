@@ -6,7 +6,7 @@
 using namespace plb; 
 namespace Bridge
 {
-  void Initialize(MPI_Comm world, const std::string& config_file);
+  void Initialize(MPI_Comm world, const std::string& config_file, double Nx, double Ny, double Nz);
   void SetData(double **x, long ntimestep, int nghost, 
                int nlocal, double xsublo, double xsubhi, 
                double ysublo, double ysubhi, double zsublo,
@@ -14,7 +14,7 @@ namespace Bridge
 	       MultiTensorField3D<double, 3> velocityDoubleArray, 
 	       MultiTensorField3D<double, 3> vorticityDoubleArray, 
 	       MultiScalarField3D<double> velocityNormDoubleArray,
-	       int nx, int ny, int nz);
+	       double Nx, double Ny, double Nz);
   void Analyze(long ntimestep); 
   void Finalize();
 }

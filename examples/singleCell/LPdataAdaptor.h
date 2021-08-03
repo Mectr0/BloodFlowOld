@@ -16,7 +16,7 @@ public:
 
   senseiTypeMacro(LPDataAdaptor, sensei::DataAdaptor);
 
-  void Initialize();
+  void Initialize(double Nx, double Ny, double Nz);
 
   void AddLAMMPSData(double **x, long ntimestep, int nghost, 
                      int nlocal, double xsublo, double xsubhi,
