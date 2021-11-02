@@ -1,6 +1,6 @@
 # Building SENSEI on a personnal computer
 
-1. Clone the repo in the home directory: `git clone https://gitlab.kitware.com/sensei/sensei.git src`
+1. Clone the repo in the home directory: `git clone https://gitlab.kitware.com/sensei/sensei.git`
 
 2. If you don't have cmake, ccmake, and make, install them.
 
@@ -8,14 +8,19 @@
 
    * Clone ParaView superbuild repo with: \
    `git clone --recursive https://gitlab.kitware.com/paraview/paraview-superbuild.git src`
+   
+   NOTE: --recursive clones all submodules for paraview
+   
+   * `git checkout v5.9.1`
+   * `git submodules update`
 
    * configure with cmake: NOTE: I used ccmake to view all configuration options, it might be helpful due to the ParaView repo updating versions (5.10.0 was available to me). \
  
-`cmake -B ./build -S ./src \
+`cmake -B ~/build/paraview-superbuild -S ~/src/ParaView-Superbuild \
   -DCMAKE_BUILD_TYPE_paraview=Release \
-  -DCMAKE_INSTALL_PREFIX="/home/mectro/pvtest/" \
+  -DCMAKE_INSTALL_PREFIX="~/install/paraview-superbuild" \
   -DENABLE_cxx11=ON \
-  -Dparaview_SOURCE_SELECTION:STRING="5.10.0" \
+  -Dparaview_SOURCE_SELECTION:STRING="5.9.1" \
   -DENABLE_zfp:BOOL=OFF \
   -DCMAKE_BUILD_TYPE:STRING=Release \
   -DENABLE_netcdf:BOOL=OFF \
@@ -66,7 +71,7 @@
    `make install`
 
 4. configure Sensei using cmake: *Here my command:
-`cmake -B ./buildsensei -S ./SENSEI -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_INSTALL_PREFIX=./install -DENABLE_SENSEI=ON -DENABLE_VTK_IO=ON -DENABLE_CATALYST=ON -DParaView_DIR="/home/mectro/build/install/lib/cmake/paraview-5.10/"`
+`cmake -B ~/build/sensei -S ~/src/SENSEI -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_INSTALL_PREFIX=~/install/SENSEI -DENABLE_SENSEI=ON -DENABLE_VTK_IO=ON -DENABLE_CATALYST=ON -DParaView_DIR="/home/mectro/install/paraview-superbuild/lib/cmake/paraview-5.9"`
 
 5. Build Sensei: \
 `cd buildsensei`
