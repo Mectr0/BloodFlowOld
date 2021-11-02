@@ -1,4 +1,4 @@
-# Building SENSEI on Cooley and running Oscillators example
+#Building SENSEI on Cooley and running Oscillators example
 1. * Clone the repo in the home directory:
 `git clone https://gitlab.kitware.com/sensei/sensei.git src`
 

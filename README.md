@@ -1,4 +1,4 @@
-# Using the BloodFlow Repository
+#Using the BloodFlow Repository
 
 Palabos + LAMMPS + SENSEI Integration for in-situ visualization is the goal for this repository.
 Dr. Jifu Tan had successfully coupled Palabos and LAMMPS to simulate the flow of blood cells within plasma. 
@@ -12,7 +12,7 @@ It attempts to explain code developed by Palabos that someone new to the softwar
 2. [SENSEI.md](SENSEI.md) : Instructions on how to build SENSEI on Cooley and how to run an example called oscillator\
    [SenseiPersonal.md](SenseiPersonal.md) gives documentation on building SENSEI on one's personal computer. This is required to run the singleCell example with SENSEI.
 
-3. [Follow this link](examples/singleCell/singleCellPersonal.md) for instructions on how to run the singleCell simulation. NOTE: This example integrates SENSEI with the bloodflow code.
+3. [Follow this link](examples/singleCell/documentation/singleCellPersonal.md) for instructions on how to run the singleCell simulation on a local pc. NOTE: This example integrates SENSEI with the bloodflow code. The embolism example will help you build LAMMPS and Palabos correctly. [Follow this link](examples/singleCell/documentation/singleCellSensei.md) for running singleCell on Cooley.
 
 
 4. examples (directory) : Several examples exist here to begin getting familiar to running such code. 
